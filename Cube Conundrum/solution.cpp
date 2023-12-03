@@ -6,6 +6,7 @@
 #include <regex>
 
 int getSumOfValidGames(const std::vector<std::string>& games, const std::map<std::string, int>& cubeCombos);
+int getSumOfGamePowers(const std::vector<std::string>& games);
 
 int main()
 {
@@ -29,7 +30,8 @@ int main()
 	gameCubes["green"] = 13;
 	gameCubes["blue"] = 14;
 
-	std::cout << "Sum of valid game IDs: " << getSumOfValidGames(puzzleInput, gameCubes) << '\n';
+	//std::cout << "Sum of valid game IDs: " << getSumOfValidGames(puzzleInput, gameCubes) << '\n';
+	std::cout << "Sum of game powers: " << getSumOfGamePowers(puzzleInput) << '\n';
 
 	return 0;
 }
@@ -112,4 +114,70 @@ int getSumOfValidGames(const std::vector<std::string>& games, const std::map<std
 	}
 	std::cout << "Valid count: " << validCount << std::endl;
 	return sum;
+}
+
+/*******************************************************************************************
+* In fewer words than what is said in the puzzle description, we need to find
+* the largest of each color number of each game, multiply those numbers together,
+* and then sum up the products of each game.
+********************************************************************************************/
+int getSumOfGamePowers(const std::vector<std::string>& games)
+{
+	int gamePowerSum = 0;
+	int largestRedValue = 0;
+	int largestGreenValue = 0;
+	int largestBlueValue = 0;
+	int gamePower = 0;
+	int matchInt = 0;
+	std::regex findRed("[[:digit:]]+(?= red)");
+	std::regex findGreen("[[:digit:]]+(?= green)");
+	std::regex findBlue("[[:digit:]]+(?= blue)");
+	std::smatch match;
+	std::regex_iterator<std::string::const_iterator> end = std::sregex_iterator();
+
+	for (int i = 0; i < games.size(); i++)
+	{
+		std::cout << "\nLine Number: " << i + 1 << std::endl;
+		//Finding the largest red cube number for game at index [i].
+		std::regex_iterator<std::string::const_iterator> it = std::sregex_iterator(games[i].begin(), games[i].end(), findRed);
+		for (it; it != end; it++)
+		{
+			match = *it;
+			matchInt = std::stoi(match.str());
+			std::cout << "red num = " << matchInt << '\n';
+			if (largestRedValue < matchInt) largestRedValue = matchInt;
+			std::cout << "largestRedValue = " << largestRedValue << '\n';
+		}
+
+		//Finding the largest green cube number for game at index [i].
+		it = std::sregex_iterator(games[i].begin(), games[i].end(), findGreen);
+		for (it; it != end; it++)
+		{
+			match = *it;
+			matchInt = std::stoi(match.str());
+			std::cout << "green num = " << matchInt << '\n';
+			if (largestGreenValue < matchInt) largestGreenValue = matchInt;
+			std::cout << "largestGreenValue = " << largestGreenValue << '\n';
+		}
+
+		//Finding the largest blue cube number for game at index [i].
+		it = std::sregex_iterator(games[i].begin(), games[i].end(), findBlue);
+		for (it; it != end; it++)
+		{
+			match = *it;
+			matchInt = std::stoi(match.str());
+			std::cout << "blue num = " << matchInt << '\n';
+			if (largestBlueValue < matchInt) largestBlueValue = matchInt;
+			std::cout << "largestBlueValue = " << largestBlueValue << '\n';
+		}
+
+		gamePower = largestRedValue * largestGreenValue * largestBlueValue;
+		std::cout << "Game Power = " << gamePower << '\n';
+		gamePowerSum += gamePower;
+
+		largestRedValue = 0;
+		largestGreenValue = 0;
+		largestBlueValue = 0;
+	}
+	return gamePowerSum;
 }

@@ -17,6 +17,7 @@
   <ItemGroup>
     <Text Include="puzzle_input.txt" />
     <Text Include="test_input.txt" />
+    <Text Include="puzzle_description.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="solution.cpp">
