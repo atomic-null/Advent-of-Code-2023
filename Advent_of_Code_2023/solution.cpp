@@ -20,7 +20,7 @@ int main()
     std::regex regexSearch("zero|one|two|three|four|five|six|seven|eight|nine|0|1|2|3|4|5|6|7|8|9");
     std::regex regexSearchReverse("orez|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin|0|1|2|3|4|5|6|7|8|9");
 
-    puzzleFile.open("puzzleinput.txt");
+    puzzleFile.open("puzzle_input.txt");
     if (puzzleFile.is_open())
     {
         while (std::getline(puzzleFile, line))

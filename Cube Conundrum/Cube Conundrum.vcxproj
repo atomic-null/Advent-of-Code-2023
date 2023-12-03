@@ -21,10 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{8c09fd45-89cd-447e-833a-36785eab3d7b}</ProjectGuid>
-    <RootNamespace>AdventofCode2023</RootNamespace>
+    <ProjectGuid>{52c63314-5cf8-41e0-b508-d40749979a12}</ProjectGuid>
+    <RootNamespace>CubeConundrum</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>Trebuchet</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -128,11 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="solution.cpp" />
+    <Text Include="puzzle_input.txt" />
+    <Text Include="test_input.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="puzzle_input.txt" />
-    <Text Include="puzzle_description.txt" />
+    <ClCompile Include="solution.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
