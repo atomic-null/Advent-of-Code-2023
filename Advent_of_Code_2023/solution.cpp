@@ -55,6 +55,9 @@ int calculateRegexResultsSum(const std::vector<std::string>& puzzle, const std::
     textNumValues["seven"] = '7';
     textNumValues["eight"] = '8';
     textNumValues["nine"] = '9';
+    
+    /*These next ten "words" are spelled backwards because
+    we'll need to search through a reveresed string later.*/
     textNumValues["orez"] = '0';
     textNumValues["eno"] = '1';
     textNumValues["owt"] = '2';
@@ -83,6 +86,7 @@ int calculateRegexResultsSum(const std::vector<std::string>& puzzle, const std::
         std::cout << "text line = " << i + 1 << '\n';
         wordsBegin = std::sregex_iterator(puzzle[i].begin(), puzzle[i].end(), search);
 
+        //Because we only want the first number (digit or word), we'll break once we find it.
         for (std::sregex_iterator j = wordsBegin; j != wordsEnd; j++)
         {
             match = *j;
@@ -92,10 +96,13 @@ int calculateRegexResultsSum(const std::vector<std::string>& puzzle, const std::
             break;
         }
 
+        //Since we can't iterate backwards with regex, we'll instead reverse the puzzle string and iterate through that.
         reversedString = puzzle[i];
         std::reverse(reversedString.begin(), reversedString.end());
         wordsBegin = std::sregex_iterator(reversedString.begin(), reversedString.end(), searchReverse);
 
+        //Because we only want the last number (digit or word) for the puzzle,
+        //or in this case, the first number (digit or word) in this reversed string, we'll break once we find it.
         for (std::sregex_iterator j = wordsBegin; j != wordsEnd; j++)
         {
             match = *j;
