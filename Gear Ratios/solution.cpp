@@ -4,11 +4,13 @@
 #include <vector>
 #include <algorithm>
 
-int getSumOfPartNumbers(std::vector<std::string> schematic);
-int getSumOfGearRatios(std::vector<std::string> schematic);
+int getSumOfPartNumbers(const std::vector<std::string> &schematic);
+long long getSumOfGearRatios(const std::vector<std::string> &schematic);
 bool isCharNum(const char& input);
 bool isCharSymbol(const char& input);
-int getGearRatio(const std::vector<int>& gearValues);
+long long getGearRatio(const std::vector<int>& gearValues);
+int findLeftGearNumber(std::string inputString, int startingIndex);
+int findRightGearNumber(std::string inputString, int startingIndex);
 
 int main()
 {
@@ -16,7 +18,7 @@ int main()
 	std::string line;
 	std::vector<std::string> puzzleInput;
 
-	puzzleFile.open("test_input.txt");
+	puzzleFile.open("puzzle_input.txt");
 	if (puzzleFile.is_open())
 	{
 		while (std::getline(puzzleFile, line))
@@ -33,14 +35,17 @@ int main()
 	return 0;
 }
 
-int getSumOfGearRatios(std::vector<std::string> schematic)
+long long getSumOfGearRatios(const std::vector<std::string> &schematic)
 {
-	int sum = 0;
+	long long sum = 0;
 	std::string number = "";
 	std::vector<int> gearValues;
+	int linecount = 0;
 
 	for (int i = 0; i < schematic.size(); ++i)
 	{
+		linecount++;
+		std::cout << "Line #: " << linecount << '\n';
 		for (int j = 0; j < schematic[i].size(); ++j)
 		{
 			if (schematic[i][j] == '*')
@@ -48,83 +53,42 @@ int getSumOfGearRatios(std::vector<std::string> schematic)
 				//checking left of the * for a number
 				if ((j - 1 != 0) && (isCharNum(schematic[i][j - 1])))
 				{
-					int k = 1;
-					bool searchFlag = true;
-					while (searchFlag)
-					{
-						if (j - k < 0)
-						{
-							searchFlag = false;
-							std::reverse(number.begin(), number.end());
-							gearValues.push_back(std::stoi(number));
-							number = "";
-							break;
-						}
-
-						if (!isCharNum(schematic[i][j - k]))
-						{
-							searchFlag = false;
-							std::reverse(number.begin(), number.end());
-							gearValues.push_back(std::stoi(number));
-							number = "";
-							break;
-						}
-
-						if (isCharNum(schematic[i][j - k]))
-						{
-							number.push_back(schematic[i][j - k]);
-						}
-						++k;
-					}
+					gearValues.push_back(findLeftGearNumber(schematic[i], j));
 				}
 
 				//checking right of the * for a number
 				if ((j != schematic[i].size() - 1) && (isCharNum(schematic[i][j + 1])))
 				{
-					int k = 1;
-					bool searchFlag = true;
-					int indexValue = 0;
-					while (searchFlag)
-					{
-						indexValue = j + k;
-						if (indexValue == schematic[i].size())
-						{
-							searchFlag = false;
-							gearValues.push_back(std::stoi(number));
-							number = "";
-							break;
-						}
-
-						if (!isCharNum(schematic[i][j + k]))
-						{
-							searchFlag = false;
-							gearValues.push_back(std::stoi(number));
-							number = "";
-							break;
-						}
-
-						if (isCharNum(schematic[i][j + k]))
-						{
-							number.push_back(schematic[i][j + k]);
-						}
-						++k;
-					}
+					gearValues.push_back(findRightGearNumber(schematic[i], j));
 				}
 
 				//checking above the * for a number
 				if (i != 0)
 				{
-					if (isCharNum(schematic[i - 1][j - 1]) ||
-						isCharNum(schematic[i - 1][j]) ||
-						isCharNum(schematic[i - 1][j + 1]))
+					if (isCharNum(schematic[i - 1][j - 1]) && !isCharNum(schematic[i - 1][j]))
+					{
+						gearValues.push_back(findLeftGearNumber(schematic[i - 1], j));
+					}
+
+					if (isCharNum(schematic[i - 1][j + 1]) && !isCharNum(schematic[i - 1][j]))
+					{
+						gearValues.push_back(findRightGearNumber(schematic[i - 1], j));
+					}
+					
+					if (isCharNum(schematic[i - 1][j]))
 					{
 						int k = j - 1;
 						bool searchFlag = true;
 
 						while (true)
 						{
-							if (k > 0 && isCharNum(schematic[i - 1][k])) k--;
-							else break;
+							if (k <= 0) break;
+							if (!isCharNum(schematic[i + 1][k]))
+							{
+								++k;
+								break;
+							}
+							if (isCharNum(schematic[i + 1][k])) k--;
 						}
 
 						while (searchFlag)
@@ -132,24 +96,16 @@ int getSumOfGearRatios(std::vector<std::string> schematic)
 							if (k == schematic[i - 1].size())
 							{
 								searchFlag = false;
-								gearValues.push_back(std::stoi(number));
+								if (number != "") gearValues.push_back(std::stoi(number));
 								number = "";
-								break;
+								continue;
 							}
 
-							if (!isCharNum(schematic[i - 1][k]) && !isCharNum(schematic[i - 1][k + 1]))
+							if (!isCharNum(schematic[i - 1][k]))
 							{
 								searchFlag = false;
-								gearValues.push_back(std::stoi(number));
+								if (number != "") gearValues.push_back(std::stoi(number));
 								number = "";
-								break;
-							}
-							else if (!isCharNum(schematic[i - 1][k]) && isCharNum(schematic[i - 1][k + 1]))
-							{
-								gearValues.push_back(std::stoi(number));
-								number = "";
-								++k;
-								continue;
 							}
 
 							if (isCharNum(schematic[i - 1][k]))
@@ -159,17 +115,76 @@ int getSumOfGearRatios(std::vector<std::string> schematic)
 							++k;
 						}
 					}
-					sum += getGearRatio(gearValues);
-					gearValues.clear();
 				}
+
+				//checking below the * for a number
+				if (i != schematic.size() - 1)
+				{
+					if (isCharNum(schematic[i + 1][j - 1]) && !isCharNum(schematic[i + 1][j]))
+					{
+						gearValues.push_back(findLeftGearNumber(schematic[i + 1], j));
+					}
+
+					if (isCharNum(schematic[i + 1][j + 1]) && !isCharNum(schematic[i + 1][j]))
+					{
+						gearValues.push_back(findRightGearNumber(schematic[i + 1], j));
+					}
+
+					if (isCharNum(schematic[i + 1][j]))
+					{
+						int k = j - 1;
+						bool searchFlag = true;
+
+						while (true)
+						{
+							if (k <= 0)
+							{
+								if (!isCharNum(schematic[i + 1][k])) ++k;
+								break;
+							}
+							if (!isCharNum(schematic[i + 1][k]))
+							{
+								++k;
+								break;
+							}
+							if (isCharNum(schematic[i + 1][k])) k--;
+						}
+
+						while (searchFlag)
+						{
+							if (k == schematic[i + 1].size())
+							{
+								searchFlag = false;
+								if (number != "") gearValues.push_back(std::stoi(number));
+								number = "";
+								continue;
+							}
+
+							if (!isCharNum(schematic[i + 1][k]))
+							{
+								searchFlag = false;
+								if (number != "") gearValues.push_back(std::stoi(number));
+								number = "";
+							}
+
+							if (isCharNum(schematic[i + 1][k]))
+							{
+								number.push_back(schematic[i + 1][k]);
+							}
+							++k;
+						}
+					}
 				}
+				if (gearValues.size() > 1) sum += getGearRatio(gearValues);
+				gearValues.clear();
+			}
 		}
 	}
 
 	return sum;
 }
 
-int getSumOfPartNumbers(std::vector<std::string> schematic)
+int getSumOfPartNumbers(const std::vector<std::string> &schematic)
 {
 	int sum = 0;
 	bool isPartNumber = false;
@@ -299,9 +314,9 @@ bool isCharSymbol(const char& input)
 	else return false;
 }
 
-int getGearRatio(const std::vector<int>& gearValues)
+long long getGearRatio(const std::vector<int>& gearValues)
 {
-	int product = 0;
+	long long product = 0;
 	for (int i = 0; i < gearValues.size(); ++i)
 	{
 		if (i == 0)
@@ -312,4 +327,86 @@ int getGearRatio(const std::vector<int>& gearValues)
 		product *= gearValues[i];
 	}
 	return product;
+}
+
+int findLeftGearNumber(std::string inputString, int startingIndex)
+{
+	int num = 0;
+	int k = 1;
+	std::string number = "";
+	bool searchFlag = true;
+	while (searchFlag)
+	{
+		if (startingIndex - k < 0)
+		{
+			searchFlag = false;
+			std::reverse(number.begin(), number.end());
+			if (number != "")
+			{
+				num = (std::stoi(number));
+			}
+			number = "";
+			break;
+		}
+
+		if (!isCharNum(inputString[startingIndex - k]))
+		{
+			searchFlag = false;
+			std::reverse(number.begin(), number.end());
+			if (number != "")
+			{
+				num = (std::stoi(number));
+			}
+			number = "";
+			break;
+		}
+
+		if (isCharNum(inputString[startingIndex - k]))
+		{
+			number.push_back(inputString[startingIndex - k]);
+		}
+		++k;
+	}
+	return num;
+}
+
+int findRightGearNumber(std::string inputString, int startingIndex)
+{
+	int num = 0;
+	int k = 1;
+	bool searchFlag = true;
+	std::string number = "";
+	int indexValue = 0;
+	while (searchFlag)
+	{
+		indexValue = startingIndex + k;
+		if (indexValue == inputString.size())
+		{
+			if (number != "")
+			{
+				num = (std::stoi(number));
+			}
+			searchFlag = false;
+			number = "";
+			break;
+		}
+
+		if (!isCharNum(inputString[startingIndex + k]))
+		{
+			if (number != "")
+			{
+				num = (std::stoi(number));
+			}
+			searchFlag = false;
+			number = "";
+			break;
+		}
+
+		if (isCharNum(inputString[startingIndex + k]))
+		{
+			number.push_back(inputString[startingIndex + k]);
+		}
+		++k;
+	}
+	return num;
 }
