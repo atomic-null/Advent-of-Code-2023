@@ -29,7 +29,7 @@ int main()
 	}
 	else std::cout << "Unable to open file.\n";
 
-	//std::cout << "Sum of part numbers is " << getSumOfPartNumbers(puzzleInput) << '\n';
+	std::cout << "Sum of part numbers is " << getSumOfPartNumbers(puzzleInput) << '\n';
 	std::cout << "Sum of gear ratios is " << getSumOfGearRatios(puzzleInput) << '\n';
 
 	return 0;
@@ -40,18 +40,15 @@ long long getSumOfGearRatios(const std::vector<std::string> &schematic)
 	long long sum = 0;
 	std::string number = "";
 	std::vector<int> gearValues;
-	int linecount = 0;
 
 	for (int i = 0; i < schematic.size(); ++i)
 	{
-		linecount++;
-		std::cout << "Line #: " << linecount << '\n';
 		for (int j = 0; j < schematic[i].size(); ++j)
 		{
 			if (schematic[i][j] == '*')
 			{
 				//checking left of the * for a number
-				if ((j - 1 != 0) && (isCharNum(schematic[i][j - 1])))
+				if ((j - 1 >= 0) && (isCharNum(schematic[i][j - 1])))
 				{
 					gearValues.push_back(findLeftGearNumber(schematic[i], j));
 				}
@@ -65,12 +62,14 @@ long long getSumOfGearRatios(const std::vector<std::string> &schematic)
 				//checking above the * for a number
 				if (i != 0)
 				{
-					if (isCharNum(schematic[i - 1][j - 1]) && !isCharNum(schematic[i - 1][j]))
+					//looking for number above left
+					if ((j - 1 >=0) && isCharNum(schematic[i - 1][j - 1]) && !isCharNum(schematic[i - 1][j]))
 					{
 						gearValues.push_back(findLeftGearNumber(schematic[i - 1], j));
 					}
 
-					if (isCharNum(schematic[i - 1][j + 1]) && !isCharNum(schematic[i - 1][j]))
+					//looking for number above right
+					if ((j != schematic[i].size() - 1) && isCharNum(schematic[i - 1][j + 1]) && !isCharNum(schematic[i - 1][j]))
 					{
 						gearValues.push_back(findRightGearNumber(schematic[i - 1], j));
 					}
@@ -82,13 +81,22 @@ long long getSumOfGearRatios(const std::vector<std::string> &schematic)
 
 						while (true)
 						{
-							if (k <= 0) break;
-							if (!isCharNum(schematic[i + 1][k]))
+							if (k <= 0)
 							{
 								++k;
 								break;
 							}
-							if (isCharNum(schematic[i + 1][k])) k--;
+							if (k > schematic[i - 1].size())
+							{
+								--k;
+								break;
+							}
+							if (!isCharNum(schematic[i - 1][k]))
+							{
+								++k;
+								break;
+							}
+							if (isCharNum(schematic[i - 1][k])) k--;
 						}
 
 						while (searchFlag)
@@ -120,12 +128,14 @@ long long getSumOfGearRatios(const std::vector<std::string> &schematic)
 				//checking below the * for a number
 				if (i != schematic.size() - 1)
 				{
-					if (isCharNum(schematic[i + 1][j - 1]) && !isCharNum(schematic[i + 1][j]))
+					//looking for number below left
+					if ((j - 1 >= 0) && isCharNum(schematic[i + 1][j - 1]) && !isCharNum(schematic[i + 1][j]))
 					{
 						gearValues.push_back(findLeftGearNumber(schematic[i + 1], j));
 					}
 
-					if (isCharNum(schematic[i + 1][j + 1]) && !isCharNum(schematic[i + 1][j]))
+					//looking for number below right
+					if ((j != schematic[i].size() - 1) && isCharNum(schematic[i + 1][j + 1]) && !isCharNum(schematic[i + 1][j]))
 					{
 						gearValues.push_back(findRightGearNumber(schematic[i + 1], j));
 					}
@@ -139,7 +149,12 @@ long long getSumOfGearRatios(const std::vector<std::string> &schematic)
 						{
 							if (k <= 0)
 							{
-								if (!isCharNum(schematic[i + 1][k])) ++k;
+								++k;
+								break;
+							}
+							if (k > schematic[i + 1].size())
+							{
+								--k;
 								break;
 							}
 							if (!isCharNum(schematic[i + 1][k]))

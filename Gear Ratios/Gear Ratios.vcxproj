@@ -130,6 +130,7 @@
     <ClCompile Include="solution.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="puzzle_description.txt" />
     <Text Include="puzzle_input.txt" />
     <Text Include="test_input.txt" />
   </ItemGroup>
