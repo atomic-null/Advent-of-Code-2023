@@ -503,34 +503,3 @@ bool isCharNum(const char& input)
 	}
 	else return false;
 }
-
-unsigned long findMappedTarget(const unsigned long *target, const unsigned long *destination, const unsigned long *source, const unsigned long *range)
-{
-	unsigned long start = *source;
-	unsigned long end = *source + *range - 1;
-	unsigned long mappedTarget = binarySearch(target, &start, &end);
-
-	return mappedTarget;
-}
-
-unsigned long binarySearch(const unsigned long *target,const unsigned long *start, const unsigned long *end)
-{
-	if (*start > *end)
-	{
-		return NULL;
-	}
-
-	unsigned long middle = (*start + *end) / 2;
-
-	if (middle == *target) return middle;
-	if (middle > *target)
-	{
-		--middle;
-		return binarySearch(target, start, &middle);
-	}
-	if (middle < *target)
-	{
-		++middle;
-		return binarySearch(target, &middle, end);
-	}
-}
