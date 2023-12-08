@@ -9,15 +9,17 @@
 using std::vector;
 using std::string;
 
-unsigned long convertSeedToSoil(const Almanac *almanac);
-unsigned long convertSoilToFertilizer(const unsigned long* soil);
-unsigned long convertFertilizerToWater(const unsigned long* fertilizer);
-unsigned long convertWaterToLight(const unsigned long* water);
-unsigned long convertLightToTemperature(const unsigned long* light);
-unsigned long convertTemperatureToHumidity(const unsigned long* temperature);
-unsigned long convertHumidityToLocation(const unsigned long* humidity);
 void parseAlmanac(vector<string> &puzzle, Almanac &almanac);
+unsigned long convertSeedToSoil(const Almanac* almanac, int* index);
+unsigned long convertSoilToFertilizer(const Almanac* almanac, int* index, const unsigned long* soilNum);
+unsigned long convertFertilizerToWater(const Almanac* almanac, int* index, const unsigned long* fertilizer);
+unsigned long convertWaterToLight(const Almanac* almanac, int* index, const unsigned long* water);
+unsigned long convertLightToTemperature(const Almanac* almanac, int* index, const unsigned long* light);
+unsigned long convertTemperatureToHumidity(const Almanac* almanac, int* index, const unsigned long* temperature);
+unsigned long convertHumidityToLocation(const Almanac* almanac, int* index, const unsigned long* humidity);
 bool isCharNum(const char &input);
+unsigned long findMappedTarget(const unsigned long* target, const unsigned long* destination, const unsigned long* source, const unsigned long* range);
+unsigned long binarySearch(const unsigned long* target, const unsigned long* start, const unsigned long* end);
 
 int main()
 {
@@ -49,18 +51,20 @@ int main()
 
 	for (int i = 0; i < almanac.seeds.size(); ++i)
 	{
-		soilNum = convertSeedToSoil(&almanac);
-		fertilizerNum = convertSoilToFertilizer(&soilNum);
-		waterNum = convertFertilizerToWater(&fertilizerNum);
-		lightNum = convertWaterToLight(&waterNum);
-		temperatureNum = convertLightToTemperature(&lightNum);
-		humidityNum = convertTemperatureToHumidity(&temperatureNum);
-		locationNum = convertHumidityToLocation(&humidityNum);
+		soilNum = convertSeedToSoil(&almanac, &i);
+		fertilizerNum = convertSoilToFertilizer(&almanac, &i, &soilNum);
+		waterNum = convertFertilizerToWater(&almanac, &i, &fertilizerNum);
+		lightNum = convertWaterToLight(&almanac, &i, &waterNum);
+		temperatureNum = convertLightToTemperature(&almanac, &i, &lightNum);
+		humidityNum = convertTemperatureToHumidity(&almanac, &i, &temperatureNum);
+		locationNum = convertHumidityToLocation(&almanac, &i, &humidityNum);
 		
+		if (i == 0) lowestLocationNum = locationNum; //Setting the lowest number for the first time around.
 		if (lowestLocationNum > locationNum) lowestLocationNum = locationNum;
 
-		std::cout << "Lowest location number for seed " << almanac.seeds[i] << " is " << lowestLocationNum << "\n";
+		std::cout << "Location number for seed " << almanac.seeds[i] << " is " << locationNum << "\n";
 	}
+	std::cout << "The lowest location number for this almanac is " << lowestLocationNum << '\n';
 
 	return 0;
 }
@@ -240,53 +244,251 @@ void parseAlmanac(vector<string> &puzzle, Almanac &almanac)
 }
 
 
-unsigned long convertSeedToSoil(const Almanac *almanac)
+unsigned long convertSeedToSoil(const Almanac *almanac, int *index)
 {
 	unsigned long soil = 0;
+	unsigned long seedNum = 0;
+	unsigned long source = 0;
+	unsigned long destination = 0;
+	unsigned long range = 0;
+	bool numIsOutsideRange = false;
+    
+	for (int i = 0; i < almanac->seed_to_soil.size(); ++i)
+	{
+		seedNum = almanac->seeds[*index];
+		destination = almanac->seed_to_soil[i][0];
+		source = almanac->seed_to_soil[i][1];
+		range = almanac->seed_to_soil[i][2];
 
+		if (seedNum > (source + range) - 1 ||
+			seedNum < source)
+		{
+			numIsOutsideRange = true;
+		}
+		else numIsOutsideRange = false;
+
+		if (numIsOutsideRange == false)
+		{
+			soil = (seedNum - source) + destination;
+			break;
+		}
+		
+		if (i >= almanac->seed_to_soil.size() - 1 && numIsOutsideRange == true)
+		{
+			soil = seedNum;
+		}
+	}
 
 	return soil;
 }
 
-unsigned long convertSoilToFertilizer(const unsigned long* soil)
+unsigned long convertSoilToFertilizer(const Almanac* almanac, int* index, const unsigned long* soilNum)
 {
 	unsigned long fertilizer = 0;
+	unsigned long source = 0;
+	unsigned long destination = 0;
+	unsigned long range = 0;
+	bool numIsOutsideRange = false;
 
-	return fertilizer = 0;
+	for (int i = 0; i < almanac->soil_to_fertilizer.size(); ++i)
+	{
+		destination = almanac->soil_to_fertilizer[i][0];
+		source = almanac->soil_to_fertilizer[i][1];
+		range = almanac->soil_to_fertilizer[i][2];
+
+		if (*soilNum > (source + range) - 1 ||
+			*soilNum < source)
+		{
+			numIsOutsideRange = true;
+		}
+		else numIsOutsideRange = false;
+
+		if (numIsOutsideRange == false)
+		{
+			fertilizer = (*soilNum - source) + destination;
+			break;
+		}
+
+		if (i >= almanac->soil_to_fertilizer.size() - 1 && numIsOutsideRange == true)
+		{
+			fertilizer = *soilNum;
+		}
+	}
+	return fertilizer;
 }
 
-unsigned long convertFertilizerToWater(const unsigned long* fertilizer)
+unsigned long convertFertilizerToWater(const Almanac* almanac, int* index, const unsigned long* fertilizerNum)
 {
 	unsigned long water = 0;
+	unsigned long source = 0;
+	unsigned long destination = 0;
+	unsigned long range = 0;
+	bool numIsOutsideRange = false;
 
+	for (int i = 0; i < almanac->fertilizer_to_water.size(); ++i)
+	{
+		destination = almanac->fertilizer_to_water[i][0];
+		source = almanac->fertilizer_to_water[i][1];
+		range = almanac->fertilizer_to_water[i][2];
+
+		if (*fertilizerNum > (source + range) - 1 ||
+			*fertilizerNum < source)
+		{
+			numIsOutsideRange = true;
+		}
+		else numIsOutsideRange = false;
+
+		if (numIsOutsideRange == false)
+		{
+			water = (*fertilizerNum - source) + destination;
+			break;
+		}
+
+		if (i >= almanac->fertilizer_to_water.size() - 1 && numIsOutsideRange == true)
+		{
+			water = *fertilizerNum;
+		}
+	}
 	return water;
 }
 
-unsigned long convertWaterToLight(const unsigned long* water)
+unsigned long convertWaterToLight(const Almanac* almanac, int* index, const unsigned long* waterNum)
 {
 	unsigned long light = 0;
+	unsigned long source = 0;
+	unsigned long destination = 0;
+	unsigned long range = 0;
+	bool numIsOutsideRange = false;
 
+	for (int i = 0; i < almanac->water_to_light.size(); ++i)
+	{
+		destination = almanac->water_to_light[i][0];
+		source = almanac->water_to_light[i][1];
+		range = almanac->water_to_light[i][2];
+
+		if (*waterNum > (source + range) - 1 ||
+			*waterNum < source)
+		{
+			numIsOutsideRange = true;
+		}
+		else numIsOutsideRange = false;
+
+		if (numIsOutsideRange == false)
+		{
+			light = (*waterNum - source) + destination;
+			break;
+		}
+
+		if (i >= almanac->water_to_light.size() - 1 && numIsOutsideRange == true)
+		{
+			light = *waterNum;
+		}
+	}
 	return light;
 }
 
-unsigned long convertLightToTemperature(const unsigned long* light)
+unsigned long convertLightToTemperature(const Almanac* almanac, int* index, const unsigned long* lightNum)
 {
 	unsigned long temperature = 0;
+	unsigned long source = 0;
+	unsigned long destination = 0;
+	unsigned long range = 0;
+	bool numIsOutsideRange = false;
 
+	for (int i = 0; i < almanac->light_to_temperature.size(); ++i)
+	{
+		destination = almanac->light_to_temperature[i][0];
+		source = almanac->light_to_temperature[i][1];
+		range = almanac->light_to_temperature[i][2];
+
+		if (*lightNum > (source + range) - 1 ||
+			*lightNum < source)
+		{
+			numIsOutsideRange = true;
+		}
+		else numIsOutsideRange = false;
+
+		if (numIsOutsideRange == false)
+		{
+			temperature = (*lightNum - source) + destination;
+			break;
+		}
+
+		if (i >= almanac->light_to_temperature.size() - 1 && numIsOutsideRange == true)
+		{
+			temperature = *lightNum;
+		}
+	}
 	return temperature;
 }
 
-unsigned long convertTemperatureToHumidity(const unsigned long* temperature)
+unsigned long convertTemperatureToHumidity(const Almanac* almanac, int* index, const unsigned long* temperatureNum)
 {
 	unsigned long humidity = 0;
+	unsigned long source = 0;
+	unsigned long destination = 0;
+	unsigned long range = 0;
+	bool numIsOutsideRange = false;
 
+	for (int i = 0; i < almanac->temperature_to_humidity.size(); ++i)
+	{
+		destination = almanac->temperature_to_humidity[i][0];
+		source = almanac->temperature_to_humidity[i][1];
+		range = almanac->temperature_to_humidity[i][2];
+
+		if (*temperatureNum > (source + range) - 1 ||
+			*temperatureNum < source)
+		{
+			numIsOutsideRange = true;
+		}
+		else numIsOutsideRange = false;
+
+		if (numIsOutsideRange == false)
+		{
+			humidity = (*temperatureNum - source) + destination;
+			break;
+		}
+
+		if (i >= almanac->temperature_to_humidity.size() - 1 && numIsOutsideRange == true)
+		{
+			humidity = *temperatureNum;
+		}
+	}
 	return humidity;
 }
 
-unsigned long convertHumidityToLocation(const unsigned long* humidity)
+unsigned long convertHumidityToLocation(const Almanac* almanac, int* index, const unsigned long* humidityNum)
 {
 	unsigned long location = 0;
+	unsigned long source = 0;
+	unsigned long destination = 0;
+	unsigned long range = 0;
+	bool numIsOutsideRange = false;
 
+	for (int i = 0; i < almanac->humidity_to_location.size(); ++i)
+	{
+		destination = almanac->humidity_to_location[i][0];
+		source = almanac->humidity_to_location[i][1];
+		range = almanac->humidity_to_location[i][2];
+
+		if (*humidityNum > (source + range) - 1 ||
+			*humidityNum < source)
+		{
+			numIsOutsideRange = true;
+		}
+		else numIsOutsideRange = false;
+
+		if (numIsOutsideRange == false)
+		{
+			location = (*humidityNum - source) + destination;
+			break;
+		}
+
+		if (i >= almanac->humidity_to_location.size() - 1 && numIsOutsideRange == true)
+		{
+			location = *humidityNum;
+		}
+	}
 	return location;
 }
 
@@ -300,4 +502,35 @@ bool isCharNum(const char& input)
 		return true;
 	}
 	else return false;
+}
+
+unsigned long findMappedTarget(const unsigned long *target, const unsigned long *destination, const unsigned long *source, const unsigned long *range)
+{
+	unsigned long start = *source;
+	unsigned long end = *source + *range - 1;
+	unsigned long mappedTarget = binarySearch(target, &start, &end);
+
+	return mappedTarget;
+}
+
+unsigned long binarySearch(const unsigned long *target,const unsigned long *start, const unsigned long *end)
+{
+	if (*start > *end)
+	{
+		return NULL;
+	}
+
+	unsigned long middle = (*start + *end) / 2;
+
+	if (middle == *target) return middle;
+	if (middle > *target)
+	{
+		--middle;
+		return binarySearch(target, start, &middle);
+	}
+	if (middle < *target)
+	{
+		++middle;
+		return binarySearch(target, &middle, end);
+	}
 }
