@@ -58,6 +58,8 @@ int calculateTotalScratchCards(std::vector<Card>& cards)
 {
 	int totalNumOfCards = 0;
 	int id = 0;
+	int elfNumSize = cards[0].getPlayerNumbers().size();
+	int winningNumSize = cards[0].getWinningNumbers().size();
 	std::vector<int> winningNumbers;
 	std::vector<int> elfNumbers;
 	std::vector<int> idToAdd;
@@ -67,11 +69,11 @@ int calculateTotalScratchCards(std::vector<Card>& cards)
 		/*Finding the IDs of the cards that will have more than one copy.*/
 		id++;
 		int tempID = id;
-		for (int j = 0; j < cards[i].getWinningNumbers().size(); ++j)
+		for (int j = 0; j < winningNumSize; ++j)
 		{
 			winningNumbers = cards[i].getWinningNumbers();
 			elfNumbers = cards[i].getPlayerNumbers();
-			for (int k = 0; k < cards[i].getPlayerNumbers().size(); ++k)
+			for (int k = 0; k < elfNumSize; ++k)
 			{
 				if (winningNumbers[j] == elfNumbers[k])
 				{
