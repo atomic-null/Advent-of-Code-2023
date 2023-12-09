@@ -131,7 +131,6 @@
     <Text Include="test_input.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="almanac.cpp" />
     <ClCompile Include="solution.cpp" />
   </ItemGroup>
   <ItemGroup>

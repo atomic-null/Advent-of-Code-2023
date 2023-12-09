@@ -24,6 +24,4 @@ public:
 
 	Almanac(){}
 
-	unsigned long getSeed();
-
 };

@@ -10,7 +10,7 @@ using std::vector;
 using std::string;
 
 void parseAlmanac(vector<string> &puzzle, Almanac &almanac);
-unsigned long getTotalSeedCount(Almanac* almanac);
+vector<unsigned long> expandSeeds(Almanac& almanac);
 unsigned long convertSourceToDestination(const vector<vector<unsigned long>>& legend, const unsigned long* source);
 bool isCharNum(const char &input);
 
@@ -20,8 +20,7 @@ int main()
 	string line;
 	vector<string> puzzleInput;
 	Almanac almanac;
-	unsigned long totalSeedCount = 0;
-	unsigned long seedNum = 0;
+	vector<unsigned long> seeds;
 	unsigned long soilNum = 0;
 	unsigned long fertilizerNum = 0;
 	unsigned long waterNum = 0;
@@ -43,11 +42,11 @@ int main()
 	else std::cout << "Unable to open file.\n";
 
 	parseAlmanac(puzzleInput, almanac);
-	totalSeedCount = getTotalSeedCount(&almanac);
+	seeds = expandSeeds(almanac);
 
-	for (int i = 0; i < almanac.seed_data.size(); ++i)
+	for (int i = 0; i < seeds.size(); ++i)
 	{
-		soilNum = convertSourceToDestination(almanac.seed_to_soil, &almanac.seed_data[i]);
+		soilNum = convertSourceToDestination(almanac.seed_to_soil, &seeds[i]);
 		fertilizerNum = convertSourceToDestination(almanac.soil_to_fertilizer, &soilNum);
 		waterNum = convertSourceToDestination(almanac.fertilizer_to_water, &fertilizerNum);
 		lightNum = convertSourceToDestination(almanac.water_to_light, &waterNum);
@@ -105,7 +104,7 @@ void parseAlmanac(vector<string> &puzzle, Almanac &almanac)
 				}
 				else if (!isCharNum(puzzle[i][j]) && number != "")
 				{
-					almanac.seeds.push_back(std::stoul(number));
+					almanac.seed_data.push_back(std::stoul(number));
 					number = "";
 				}
 			}
@@ -239,13 +238,28 @@ void parseAlmanac(vector<string> &puzzle, Almanac &almanac)
 	}
 }
 
+vector<unsigned long> expandSeeds(Almanac &almanac)
+{
+	vector<unsigned long> seeds;
+
+	for (int i = 1; i < almanac.seed_data.size(); i = i + 2)
+	{
+		for (int j = 0; j < almanac.seed_data[i] - 1; ++j)
+		{
+			seeds.push_back(almanac.seed_data[i - 1] + j);
+		}
+	}
+
+	return seeds;
+}
+
 unsigned long getTotalSeedCount(Almanac* almanac)
 {
 	unsigned long total = 0;
 
-	for (int i = 1; i < almanac->seeds.size(); i = i + 2)
+	for (int i = 1; i < almanac->seed_data.size(); i = i + 2)
 	{
-		total += almanac->seeds[i];
+		total += almanac->seed_data[i];
 	}
 
 	return total;
