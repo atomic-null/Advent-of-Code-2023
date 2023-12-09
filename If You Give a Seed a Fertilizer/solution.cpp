@@ -10,7 +10,7 @@ using std::vector;
 using std::string;
 
 void parseAlmanac(vector<string> &puzzle, Almanac &almanac);
-vector<unsigned long> expandSeeds(Almanac& almanac);
+void expandSeeds(Almanac& almanac, vector<unsigned long>& seeds);
 unsigned long convertSourceToDestination(const vector<vector<unsigned long>>& legend, const unsigned long* source);
 bool isCharNum(const char &input);
 
@@ -30,7 +30,7 @@ int main()
 	unsigned long locationNum = 0;
 	unsigned long lowestLocationNum = 0;
 
-	puzzleFile.open("test_input.txt");
+	puzzleFile.open("puzzle_input.txt");
 	if (puzzleFile.is_open())
 	{
 		while (std::getline(puzzleFile, line))
@@ -42,7 +42,7 @@ int main()
 	else std::cout << "Unable to open file.\n";
 
 	parseAlmanac(puzzleInput, almanac);
-	seeds = expandSeeds(almanac);
+	expandSeeds(almanac, seeds);
 
 	for (int i = 0; i < seeds.size(); ++i)
 	{
@@ -57,7 +57,7 @@ int main()
 		if (i == 0) lowestLocationNum = locationNum; //Setting the lowest number for the first time around.
 		if (lowestLocationNum > locationNum) lowestLocationNum = locationNum;
 
-		std::cout << "Location number for seed " << almanac.seed_data[i] << " is " << locationNum << "\n";
+		//std::cout << "Location number for seed " << seeds[i] << " is " << locationNum << "\n";
 	}
 	std::cout << "The lowest location number for this almanac is " << lowestLocationNum << '\n';
 
@@ -238,10 +238,8 @@ void parseAlmanac(vector<string> &puzzle, Almanac &almanac)
 	}
 }
 
-vector<unsigned long> expandSeeds(Almanac &almanac)
+void expandSeeds(Almanac &almanac, vector<unsigned long> &seeds)
 {
-	vector<unsigned long> seeds;
-
 	for (int i = 1; i < almanac.seed_data.size(); i = i + 2)
 	{
 		for (int j = 0; j < almanac.seed_data[i] - 1; ++j)
@@ -249,8 +247,6 @@ vector<unsigned long> expandSeeds(Almanac &almanac)
 			seeds.push_back(almanac.seed_data[i - 1] + j);
 		}
 	}
-
-	return seeds;
 }
 
 unsigned long getTotalSeedCount(Almanac* almanac)
