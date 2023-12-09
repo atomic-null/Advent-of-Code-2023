@@ -6,7 +6,7 @@ using std::vector;
 class Almanac
 {
 public:
-	vector<unsigned long> seeds;
+	vector<unsigned long> seed_data;
 	vector<unsigned long> sts;
 	vector<unsigned long> stf;
 	vector<unsigned long> ftw;
@@ -23,5 +23,7 @@ public:
 	vector<vector<unsigned long>> humidity_to_location;
 
 	Almanac(){}
+
+	unsigned long getSeed();
 
 };

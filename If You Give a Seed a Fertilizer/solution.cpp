@@ -31,7 +31,7 @@ int main()
 	unsigned long locationNum = 0;
 	unsigned long lowestLocationNum = 0;
 
-	puzzleFile.open("puzzle_input.txt");
+	puzzleFile.open("test_input.txt");
 	if (puzzleFile.is_open())
 	{
 		while (std::getline(puzzleFile, line))
@@ -45,9 +45,9 @@ int main()
 	parseAlmanac(puzzleInput, almanac);
 	totalSeedCount = getTotalSeedCount(&almanac);
 
-	for (int i = 0; i < almanac.seeds.size(); ++i)
+	for (int i = 0; i < almanac.seed_data.size(); ++i)
 	{
-		soilNum = convertSourceToDestination(almanac.seed_to_soil, &almanac.seeds[i]);
+		soilNum = convertSourceToDestination(almanac.seed_to_soil, &almanac.seed_data[i]);
 		fertilizerNum = convertSourceToDestination(almanac.soil_to_fertilizer, &soilNum);
 		waterNum = convertSourceToDestination(almanac.fertilizer_to_water, &fertilizerNum);
 		lightNum = convertSourceToDestination(almanac.water_to_light, &waterNum);
@@ -58,7 +58,7 @@ int main()
 		if (i == 0) lowestLocationNum = locationNum; //Setting the lowest number for the first time around.
 		if (lowestLocationNum > locationNum) lowestLocationNum = locationNum;
 
-		std::cout << "Location number for seed " << almanac.seeds[i] << " is " << locationNum << "\n";
+		std::cout << "Location number for seed " << almanac.seed_data[i] << " is " << locationNum << "\n";
 	}
 	std::cout << "The lowest location number for this almanac is " << lowestLocationNum << '\n';
 
