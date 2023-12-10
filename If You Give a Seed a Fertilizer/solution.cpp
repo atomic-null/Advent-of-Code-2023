@@ -13,6 +13,9 @@ void parseAlmanac(vector<string> &puzzle, Almanac &almanac);
 void expandSeeds(Almanac& almanac, vector<unsigned long>& seeds);
 unsigned long convertSourceToDestination(const vector<vector<unsigned long>>& legend, const unsigned long* source);
 bool isCharNum(const char &input);
+unsigned long getTotalSeedCount(Almanac* almanac);
+void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedIndex, unsigned long* seedRange);
+unsigned long binarySearch(const unsigned long* target, const unsigned long* start, const unsigned long* end);
 
 int main()
 {
@@ -21,6 +24,10 @@ int main()
 	vector<string> puzzleInput;
 	Almanac almanac;
 	vector<unsigned long> seeds;
+	unsigned long numOfSeeds = 0;
+	unsigned long seedNum = 0;
+	unsigned long seedIndex = 0;
+	unsigned long seedRange = 1;
 	unsigned long soilNum = 0;
 	unsigned long fertilizerNum = 0;
 	unsigned long waterNum = 0;
@@ -30,7 +37,7 @@ int main()
 	unsigned long locationNum = 0;
 	unsigned long lowestLocationNum = 0;
 
-	puzzleFile.open("puzzle_input.txt");
+	puzzleFile.open("test_input.txt");
 	if (puzzleFile.is_open())
 	{
 		while (std::getline(puzzleFile, line))
@@ -42,11 +49,14 @@ int main()
 	else std::cout << "Unable to open file.\n";
 
 	parseAlmanac(puzzleInput, almanac);
-	expandSeeds(almanac, seeds);
+	//expandSeeds(almanac, seeds);
+	numOfSeeds = getTotalSeedCount(&almanac);
 
-	for (int i = 0; i < seeds.size(); ++i)
+
+	for (int i = 0; i < numOfSeeds; ++i)
 	{
-		soilNum = convertSourceToDestination(almanac.seed_to_soil, &seeds[i]);
+		getSeedNum(&almanac, &seedNum, &seedIndex, &seedRange);
+		soilNum = convertSourceToDestination(almanac.seed_to_soil, &seedNum);
 		fertilizerNum = convertSourceToDestination(almanac.soil_to_fertilizer, &soilNum);
 		waterNum = convertSourceToDestination(almanac.fertilizer_to_water, &fertilizerNum);
 		lightNum = convertSourceToDestination(almanac.water_to_light, &waterNum);
@@ -57,7 +67,7 @@ int main()
 		if (i == 0) lowestLocationNum = locationNum; //Setting the lowest number for the first time around.
 		if (lowestLocationNum > locationNum) lowestLocationNum = locationNum;
 
-		//std::cout << "Location number for seed " << seeds[i] << " is " << locationNum << "\n";
+		std::cout << "Location number for seed " << seedNum << " is " << locationNum << "\n";
 	}
 	std::cout << "The lowest location number for this almanac is " << lowestLocationNum << '\n';
 
@@ -261,7 +271,62 @@ unsigned long getTotalSeedCount(Almanac* almanac)
 	return total;
 }
 
-unsigned long convertSourceToDestination(const vector<vector<unsigned long>> &legend, const unsigned long* source)
+void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedIndex, unsigned long* seedRange)
+{
+	if (*seedNum == 0 && *seedNum != almanac->seed_data[*seedIndex])
+	{
+		*seedNum = almanac->seed_data[*seedIndex];
+		return;
+	}
+	if (*seedNum > (almanac->seed_data[*seedIndex] + almanac->seed_data[*seedRange]) - 1)
+	{
+		*seedIndex = *seedIndex + 1;
+		*seedRange = *seedRange + 1;
+		*seedNum = almanac->seed_data[*seedIndex];
+	}
+	else
+	{
+		*seedNum = *seedNum + 1;
+	}
+}
+
+//unsigned long convertSourceToDestination(const vector<vector<unsigned long>> &legend, const unsigned long* source)
+//{
+//	unsigned long destination = 0;
+//	unsigned long tempSource = 0;
+//	unsigned long tempDestination = 0;
+//	unsigned long range = 0;
+//	bool numIsOutsideRange = false;
+//
+//	for (int i = 0; i < legend.size(); ++i)
+//	{
+//
+//		tempDestination = legend[i][0];
+//		tempSource = legend[i][1];
+//		range = legend[i][2];
+//
+//		if (*source > (tempSource + range) - 1 ||
+//			*source < tempSource)
+//		{
+//			numIsOutsideRange = true;
+//		}
+//		else numIsOutsideRange = false;
+//
+//		if (numIsOutsideRange == false)
+//		{
+//			destination = (*source - tempSource) + tempDestination;
+//			break;
+//		}
+//
+//		if (i >= legend.size() - 1 && numIsOutsideRange == true)
+//		{
+//			destination = *source;
+//		}
+//	}
+//	return destination;
+//}
+
+unsigned long convertSourceToDestination(const vector<vector<unsigned long>>& legend, const unsigned long* source)
 {
 	unsigned long destination = 0;
 	unsigned long tempSource = 0;
@@ -294,8 +359,7 @@ unsigned long convertSourceToDestination(const vector<vector<unsigned long>> &le
 			destination = *source;
 		}
 	}
-	return destination;
-}
+
 
 bool isCharNum(const char& input)
 {
@@ -307,4 +371,26 @@ bool isCharNum(const char& input)
 		return true;
 	}
 	else return false;
+}
+
+unsigned long binarySearch(const unsigned long* target, const unsigned long* start, const unsigned long* end)
+{
+	if (*start > *end)
+	{
+		return NULL;
+	}
+
+	unsigned long middle = (*start + *end) / 2;
+
+	if (middle == *target) return middle;
+	if (middle > *target)
+	{
+		--middle;
+		return binarySearch(target, start, &middle);
+	}
+	if (middle < *target)
+	{
+		++middle;
+		return binarySearch(target, &middle, end);
+	}
 }
