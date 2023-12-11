@@ -4,18 +4,18 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <thread>
 #include "almanac.h"
 
 using std::vector;
 using std::string;
 
 void parseAlmanac(vector<string> &puzzle, Almanac &almanac);
-void expandSeeds(Almanac& almanac, vector<unsigned long>& seeds);
 unsigned long convertSourceToDestination(const vector<vector<unsigned long>>& legend, const unsigned long* source);
 bool isCharNum(const char &input);
 unsigned long getTotalSeedCount(Almanac* almanac);
-void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedIndex, unsigned long* seedRange);
-unsigned long binarySearch(const unsigned long* target, const unsigned long* start, const unsigned long* end);
+void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedIndex, unsigned long* seedRange, unsigned long* numOfSeeds);
+unsigned long getLowestLocationNumber(Almanac* almanac, unsigned long* numOfSeeds);
 
 int main()
 {
@@ -25,16 +25,7 @@ int main()
 	Almanac almanac;
 	vector<unsigned long> seeds;
 	unsigned long numOfSeeds = 0;
-	unsigned long seedNum = 0;
-	unsigned long seedIndex = 0;
-	unsigned long seedRange = 1;
-	unsigned long soilNum = 0;
-	unsigned long fertilizerNum = 0;
-	unsigned long waterNum = 0;
-	unsigned long lightNum = 0;
-	unsigned long temperatureNum = 0;
-	unsigned long humidityNum = 0;
-	unsigned long locationNum = 0;
+
 	unsigned long lowestLocationNum = 0;
 
 	puzzleFile.open("test_input.txt");
@@ -49,26 +40,10 @@ int main()
 	else std::cout << "Unable to open file.\n";
 
 	parseAlmanac(puzzleInput, almanac);
-	//expandSeeds(almanac, seeds);
 	numOfSeeds = getTotalSeedCount(&almanac);
 
+	lowestLocationNum = getLowestLocationNumber(&almanac, &numOfSeeds);
 
-	for (int i = 0; i < numOfSeeds; ++i)
-	{
-		getSeedNum(&almanac, &seedNum, &seedIndex, &seedRange);
-		soilNum = convertSourceToDestination(almanac.seed_to_soil, &seedNum);
-		fertilizerNum = convertSourceToDestination(almanac.soil_to_fertilizer, &soilNum);
-		waterNum = convertSourceToDestination(almanac.fertilizer_to_water, &fertilizerNum);
-		lightNum = convertSourceToDestination(almanac.water_to_light, &waterNum);
-		temperatureNum = convertSourceToDestination(almanac.light_to_temperature, &lightNum);
-		humidityNum = convertSourceToDestination(almanac.temperature_to_humidity, &temperatureNum);
-		locationNum = convertSourceToDestination(almanac.humidity_to_location, &humidityNum);
-		
-		if (i == 0) lowestLocationNum = locationNum; //Setting the lowest number for the first time around.
-		if (lowestLocationNum > locationNum) lowestLocationNum = locationNum;
-
-		std::cout << "Location number for seed " << seedNum << " is " << locationNum << "\n";
-	}
 	std::cout << "The lowest location number for this almanac is " << lowestLocationNum << '\n';
 
 	return 0;
@@ -248,17 +223,6 @@ void parseAlmanac(vector<string> &puzzle, Almanac &almanac)
 	}
 }
 
-void expandSeeds(Almanac &almanac, vector<unsigned long> &seeds)
-{
-	for (int i = 1; i < almanac.seed_data.size(); i = i + 2)
-	{
-		for (int j = 0; j < almanac.seed_data[i] - 1; ++j)
-		{
-			seeds.push_back(almanac.seed_data[i - 1] + j);
-		}
-	}
-}
-
 unsigned long getTotalSeedCount(Almanac* almanac)
 {
 	unsigned long total = 0;
@@ -271,8 +235,9 @@ unsigned long getTotalSeedCount(Almanac* almanac)
 	return total;
 }
 
-void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedIndex, unsigned long* seedRange)
+void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedIndex, unsigned long* seedRange, unsigned long* numOfSeeds)
 {
+	if (*seedIndex > *numOfSeeds) return;
 	if (*seedNum == 0 && *seedNum != almanac->seed_data[*seedIndex])
 	{
 		*seedNum = almanac->seed_data[*seedIndex];
@@ -290,43 +255,7 @@ void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedInd
 	}
 }
 
-//unsigned long convertSourceToDestination(const vector<vector<unsigned long>> &legend, const unsigned long* source)
-//{
-//	unsigned long destination = 0;
-//	unsigned long tempSource = 0;
-//	unsigned long tempDestination = 0;
-//	unsigned long range = 0;
-//	bool numIsOutsideRange = false;
-//
-//	for (int i = 0; i < legend.size(); ++i)
-//	{
-//
-//		tempDestination = legend[i][0];
-//		tempSource = legend[i][1];
-//		range = legend[i][2];
-//
-//		if (*source > (tempSource + range) - 1 ||
-//			*source < tempSource)
-//		{
-//			numIsOutsideRange = true;
-//		}
-//		else numIsOutsideRange = false;
-//
-//		if (numIsOutsideRange == false)
-//		{
-//			destination = (*source - tempSource) + tempDestination;
-//			break;
-//		}
-//
-//		if (i >= legend.size() - 1 && numIsOutsideRange == true)
-//		{
-//			destination = *source;
-//		}
-//	}
-//	return destination;
-//}
-
-unsigned long convertSourceToDestination(const vector<vector<unsigned long>>& legend, const unsigned long* source)
+unsigned long convertSourceToDestination(const vector<vector<unsigned long>> &legend, const unsigned long* source)
 {
 	unsigned long destination = 0;
 	unsigned long tempSource = 0;
@@ -359,7 +288,42 @@ unsigned long convertSourceToDestination(const vector<vector<unsigned long>>& le
 			destination = *source;
 		}
 	}
+	return destination;
+}
 
+unsigned long getLowestLocationNumber(Almanac *almanac, unsigned long *numOfSeeds)
+{
+	unsigned long seedNum = 0;
+	unsigned long seedIndex = 0;
+	unsigned long seedRange = 1;
+	unsigned long soilNum = 0;
+	unsigned long fertilizerNum = 0;
+	unsigned long waterNum = 0;
+	unsigned long lightNum = 0;
+	unsigned long temperatureNum = 0;
+	unsigned long humidityNum = 0;
+	unsigned long locationNum = 0;
+	unsigned long lowestLocationNum = 0;
+
+
+	for (int i = 0; i < *numOfSeeds; ++i)
+	{
+		getSeedNum(almanac, &seedNum, &seedIndex, &seedRange, numOfSeeds);
+		soilNum = convertSourceToDestination(almanac->seed_to_soil, &seedNum);
+		fertilizerNum = convertSourceToDestination(almanac->soil_to_fertilizer, &soilNum);
+		waterNum = convertSourceToDestination(almanac->fertilizer_to_water, &fertilizerNum);
+		lightNum = convertSourceToDestination(almanac->water_to_light, &waterNum);
+		temperatureNum = convertSourceToDestination(almanac->light_to_temperature, &lightNum);
+		humidityNum = convertSourceToDestination(almanac->temperature_to_humidity, &temperatureNum);
+		locationNum = convertSourceToDestination(almanac->humidity_to_location, &humidityNum);
+
+		if (i == 0) lowestLocationNum = locationNum; //Setting the lowest number for the first time around.
+		if (lowestLocationNum > locationNum) lowestLocationNum = locationNum;
+
+		std::cout << "Location number for seed " << seedNum << " is " << locationNum << "\n";
+	}
+	return lowestLocationNum;
+}
 
 bool isCharNum(const char& input)
 {
@@ -371,26 +335,4 @@ bool isCharNum(const char& input)
 		return true;
 	}
 	else return false;
-}
-
-unsigned long binarySearch(const unsigned long* target, const unsigned long* start, const unsigned long* end)
-{
-	if (*start > *end)
-	{
-		return NULL;
-	}
-
-	unsigned long middle = (*start + *end) / 2;
-
-	if (middle == *target) return middle;
-	if (middle > *target)
-	{
-		--middle;
-		return binarySearch(target, start, &middle);
-	}
-	if (middle < *target)
-	{
-		++middle;
-		return binarySearch(target, &middle, end);
-	}
 }
