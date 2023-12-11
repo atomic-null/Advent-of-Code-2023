@@ -5,17 +5,21 @@
 #include <vector>
 #include <algorithm>
 #include <thread>
+#include <mutex>
 #include "almanac.h"
 
 using std::vector;
 using std::string;
+using std::thread;
+
+std::mutex numMutex;
 
 void parseAlmanac(vector<string> &puzzle, Almanac &almanac);
 unsigned long convertSourceToDestination(const vector<vector<unsigned long>>& legend, const unsigned long* source);
 bool isCharNum(const char &input);
 unsigned long getTotalSeedCount(Almanac* almanac);
 void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedIndex, unsigned long* seedRange, unsigned long* numOfSeeds);
-unsigned long getLowestLocationNumber(Almanac* almanac, unsigned long* numOfSeeds);
+void getLowestLocationNumber(Almanac* almanac, unsigned long* numOfSeeds, unsigned long* lowestLocationNumber);
 
 int main()
 {
@@ -42,7 +46,66 @@ int main()
 	parseAlmanac(puzzleInput, almanac);
 	numOfSeeds = getTotalSeedCount(&almanac);
 
-	lowestLocationNum = getLowestLocationNumber(&almanac, &numOfSeeds);
+	thread t1(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t2(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t3(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t4(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t5(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t6(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t7(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t8(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t9(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t10(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t11(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t12(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t13(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t14(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t15(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t16(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t17(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t18(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t19(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t20(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t21(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t22(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t23(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t24(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t25(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t26(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t27(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t28(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t29(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	thread t30(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+	t1.join();
+	t2.join();
+	t3.join();
+	t4.join();
+	t5.join();
+	t6.join();
+	t7.join();
+	t8.join();
+	t9.join();
+	t10.join();
+	t11.join();
+	t12.join();
+	t13.join();
+	t14.join();
+	t15.join();
+	t16.join();
+	t17.join();
+	t18.join();
+	t19.join();
+	t20.join();
+	t21.join();
+	t22.join();
+	t23.join();
+	t24.join();
+	t25.join();
+	t26.join();
+	t27.join();
+	t28.join();
+	t29.join();
+	t30.join();
 
 	std::cout << "The lowest location number for this almanac is " << lowestLocationNum << '\n';
 
@@ -291,10 +354,10 @@ unsigned long convertSourceToDestination(const vector<vector<unsigned long>> &le
 	return destination;
 }
 
-unsigned long getLowestLocationNumber(Almanac *almanac, unsigned long *numOfSeeds)
+void getLowestLocationNumber(Almanac *almanac, unsigned long *numOfSeeds, unsigned long *lowestLocationNumber)
 {
 	unsigned long seedNum = 0;
-	unsigned long seedIndex = 0;
+	static unsigned long s_seedIndex = 0;
 	unsigned long seedRange = 1;
 	unsigned long soilNum = 0;
 	unsigned long fertilizerNum = 0;
@@ -303,12 +366,12 @@ unsigned long getLowestLocationNumber(Almanac *almanac, unsigned long *numOfSeed
 	unsigned long temperatureNum = 0;
 	unsigned long humidityNum = 0;
 	unsigned long locationNum = 0;
-	unsigned long lowestLocationNum = 0;
+	static unsigned long s_i = 0;
 
-
-	for (int i = 0; i < *numOfSeeds; ++i)
+	while (s_i < *numOfSeeds)
 	{
-		getSeedNum(almanac, &seedNum, &seedIndex, &seedRange, numOfSeeds);
+		if (s_i > *numOfSeeds) return;
+		getSeedNum(almanac, &seedNum, &s_seedIndex, &seedRange, numOfSeeds);
 		soilNum = convertSourceToDestination(almanac->seed_to_soil, &seedNum);
 		fertilizerNum = convertSourceToDestination(almanac->soil_to_fertilizer, &soilNum);
 		waterNum = convertSourceToDestination(almanac->fertilizer_to_water, &fertilizerNum);
@@ -317,12 +380,14 @@ unsigned long getLowestLocationNumber(Almanac *almanac, unsigned long *numOfSeed
 		humidityNum = convertSourceToDestination(almanac->temperature_to_humidity, &temperatureNum);
 		locationNum = convertSourceToDestination(almanac->humidity_to_location, &humidityNum);
 
-		if (i == 0) lowestLocationNum = locationNum; //Setting the lowest number for the first time around.
-		if (lowestLocationNum > locationNum) lowestLocationNum = locationNum;
-
+		std::unique_lock<std::mutex> numLock(numMutex);
+		if (s_i == 0) *lowestLocationNumber = locationNum; //Setting the lowest number for the first time around.
+		if (*lowestLocationNumber > locationNum) *lowestLocationNumber = locationNum;
+		std::cout << "s_i = " << s_i << std::endl;
 		std::cout << "Location number for seed " << seedNum << " is " << locationNum << "\n";
+		s_i++;
+		numLock.unlock();
 	}
-	return lowestLocationNum;
 }
 
 bool isCharNum(const char& input)
