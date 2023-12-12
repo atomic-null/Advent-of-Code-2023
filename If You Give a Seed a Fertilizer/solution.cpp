@@ -17,9 +17,9 @@ std::mutex numMutex;
 void parseAlmanac(vector<string> &puzzle, Almanac &almanac);
 unsigned long convertSourceToDestination(const vector<vector<unsigned long>>& legend, const unsigned long* source);
 bool isCharNum(const char &input);
-unsigned long getTotalSeedCount(Almanac* almanac);
-void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedIndex, unsigned long* seedRange, unsigned long* numOfSeeds);
-void getLowestLocationNumber(Almanac* almanac, unsigned long* numOfSeeds, unsigned long* lowestLocationNumber);
+long getTotalSeedCount(Almanac* almanac);
+void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedIndex, unsigned long* seedRange, long* numOfSeeds);
+void getLowestLocationNumber(Almanac* almanac, long* numOfSeeds, unsigned long* lowestLocationNumber);
 
 int main()
 {
@@ -28,7 +28,8 @@ int main()
 	vector<string> puzzleInput;
 	Almanac almanac;
 	vector<unsigned long> seeds;
-	unsigned long numOfSeeds = 0;
+	long numOfSeeds = 0;
+	static long s_i = -1;
 
 	unsigned long lowestLocationNum = 0;
 
@@ -46,67 +47,69 @@ int main()
 	parseAlmanac(puzzleInput, almanac);
 	numOfSeeds = getTotalSeedCount(&almanac);
 
-	thread t1(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t2(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t3(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t4(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t5(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t6(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t7(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t8(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t9(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t10(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t11(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t12(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t13(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t14(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t15(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t16(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t17(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t18(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t19(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t20(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t21(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t22(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t23(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t24(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t25(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t26(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t27(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t28(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t29(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	thread t30(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
-	t1.join();
-	t2.join();
-	t3.join();
-	t4.join();
-	t5.join();
-	t6.join();
-	t7.join();
-	t8.join();
-	t9.join();
-	t10.join();
-	t11.join();
-	t12.join();
-	t13.join();
-	t14.join();
-	t15.join();
-	t16.join();
-	t17.join();
-	t18.join();
-	t19.join();
-	t20.join();
-	t21.join();
-	t22.join();
-	t23.join();
-	t24.join();
-	t25.join();
-	t26.join();
-	t27.join();
-	t28.join();
-	t29.join();
-	t30.join();
-
+	for (int i = 0; i < numOfSeeds; ++i)
+	{
+		thread t1(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		/*thread t2(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t3(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t4(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t5(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t6(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t7(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t8(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t9(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t10(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t11(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t12(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t13(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t14(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t15(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t16(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t17(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t18(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t19(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t20(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t21(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t22(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t23(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t24(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t25(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t26(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t27(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t28(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t29(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);
+		thread t30(getLowestLocationNumber, &almanac, &numOfSeeds, &lowestLocationNum);*/
+		t1.join();
+		/*t2.join();
+		t3.join();
+		t4.join();
+		t5.join();
+		t6.join();
+		t7.join();
+		t8.join();
+		t9.join();
+		t10.join();
+		t11.join();
+		t12.join();
+		t13.join();
+		t14.join();
+		t15.join();
+		t16.join();
+		t17.join();
+		t18.join();
+		t19.join();
+		t20.join();
+		t21.join();
+		t22.join();
+		t23.join();
+		t24.join();
+		t25.join();
+		t26.join();
+		t27.join();
+		t28.join();
+		t29.join();
+		t30.join();*/
+	}
 	std::cout << "The lowest location number for this almanac is " << lowestLocationNum << '\n';
 
 	return 0;
@@ -286,9 +289,9 @@ void parseAlmanac(vector<string> &puzzle, Almanac &almanac)
 	}
 }
 
-unsigned long getTotalSeedCount(Almanac* almanac)
+long getTotalSeedCount(Almanac* almanac)
 {
-	unsigned long total = 0;
+	long total = 0;
 
 	for (int i = 1; i < almanac->seed_data.size(); i = i + 2)
 	{
@@ -298,7 +301,7 @@ unsigned long getTotalSeedCount(Almanac* almanac)
 	return total;
 }
 
-void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedIndex, unsigned long* seedRange, unsigned long* numOfSeeds)
+void getSeedNum(Almanac* almanac, unsigned long* seedNum, unsigned long* seedIndex, unsigned long* seedRange, long* numOfSeeds)
 {
 	if (*seedIndex > *numOfSeeds) return;
 	if (*seedNum == 0 && *seedNum != almanac->seed_data[*seedIndex])
@@ -354,7 +357,7 @@ unsigned long convertSourceToDestination(const vector<vector<unsigned long>> &le
 	return destination;
 }
 
-void getLowestLocationNumber(Almanac *almanac, unsigned long *numOfSeeds, unsigned long *lowestLocationNumber)
+void getLowestLocationNumber(Almanac *almanac, long *numOfSeeds, unsigned long *lowestLocationNumber)
 {
 	unsigned long seedNum = 0;
 	static unsigned long s_seedIndex = 0;
@@ -388,6 +391,7 @@ void getLowestLocationNumber(Almanac *almanac, unsigned long *numOfSeeds, unsign
 		s_i++;
 		numLock.unlock();
 	}
+	
 }
 
 bool isCharNum(const char& input)

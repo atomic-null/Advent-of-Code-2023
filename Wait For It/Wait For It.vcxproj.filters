@@ -15,18 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="test_input.txt" />
-    <Text Include="puzzle_input.txt" />
-    <Text Include="puzzle_instructions.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="solution.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="almanac.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <Text Include="test_input.txt" />
+    <Text Include="puzzle_input.txt" />
   </ItemGroup>
 </Project>
