@@ -49,9 +49,28 @@ int distanceTravelled(int speed, int timeRemaining)
 	return speed * timeRemaining;
 }
 
-int getMarginOfError()
+int getMarginOfError(map<int, int>* races)
 {
+	int raceTime = 0;
+	int recordDistance = 0;
+	int boatSpeed = 0;
+	int boatTimeRemaining = 0;
+	int marginOfError = 0;
 
+	for (auto it = races->begin(); it != races->end(); ++it)
+	{
+		raceTime= it->first;
+		recordDistance = it->second;
+
+		for (int boatTime = 0; boatTime < raceTime; ++boatTime)
+		{
+			boatSpeed = chargeBoat(boatTime);
+			boatTimeRemaining = 
+			distanceTravelled(, )
+		}
+	}
+
+	return 0;
 }
 void parsePuzzle(vector<string>& puzzle, map<int, int>* races)
 {
