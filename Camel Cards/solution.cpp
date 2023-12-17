@@ -90,8 +90,17 @@ int getCardRank(string hand)
 
 	std::cout << hand << '\n';
 
-	for (int i = 0; i < hand.size() - 1; ++i)
+	for (int i = 0; i < hand.size(); ++i)
 	{
+		if (i == hand.size() - 1)
+		{
+			cardCount = cardNumCounts[setIndex];
+			cardCount++;
+			cardNumCounts[setIndex] = cardCount;
+			cardCount = 0;
+			continue;
+		}
+
 		if (hand[i] == hand[i + 1])
 		{
 			cardCount = cardNumCounts[setIndex];
@@ -105,6 +114,7 @@ int getCardRank(string hand)
 			cardCount++;
 			cardNumCounts[setIndex] = cardCount;
 			setIndex++;
+			cardCount = 0;
 		}
 
 	}
@@ -146,6 +156,10 @@ int getCardRank(string hand)
 
 	return rank;
 }
+
+//create compareHandRank
+
+//create calculateTotalBidValue
 
 bool isCharNum(const char& input)
 {
