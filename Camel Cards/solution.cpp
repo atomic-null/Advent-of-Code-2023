@@ -3,13 +3,12 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <map>
 
 using std::vector;
 using std::string;
-using std::map;
 
-void parsePuzzle(vector<string>& puzzle, map<string, int>* bets);
+void parsePuzzle(vector<string>& puzzle, vector<vector<string>>* bets);
+int getCardRank(string hand);
 bool isCharNum(const char& input);
 
 int main()
@@ -17,9 +16,9 @@ int main()
 	std::ifstream puzzleFile;
 	string line;
 	vector<string> puzzleInput;
-	map<string, int> hand_bids;
+	vector<vector<string>> hand_bids;
 
-	puzzleFile.open("puzzle_input.txt");
+	puzzleFile.open("test_input.txt");
 	if (puzzleFile.is_open())
 	{
 		while (std::getline(puzzleFile, line))
@@ -35,10 +34,11 @@ int main()
 	return 0;
 }
 
-void parsePuzzle(vector<string>& puzzle, map<string, int>* bets)
+void parsePuzzle(vector<string>& puzzle, vector<vector<string>>* bets)
 {
 	string hand = "";
 	string bid = "";
+	vector<string> bet;
 	bool isHand = true;
 
 	for (int i = 0; i < puzzle.size(); ++i)
@@ -53,7 +53,9 @@ void parsePuzzle(vector<string>& puzzle, map<string, int>* bets)
 
 			if (j >= puzzle[i].size())
 			{
-				bets->emplace(hand, std::stoi(bid));
+				bet.push_back(hand);
+				bet.push_back(bid);
+				bet.push_back(std::to_string(getCardRank(hand)));
 				hand = "";
 				bid = "";
 				isHand = true;
@@ -70,7 +72,79 @@ void parsePuzzle(vector<string>& puzzle, map<string, int>* bets)
 				bid.push_back(puzzle[i][j]);
 			}
 		}
+		bets->push_back(bet);
+		bet.clear();
 	}	
+}
+
+int getCardRank(string hand)
+{
+	int rank = 0;
+	int setIndex = 0;
+	int cardCount = 0;
+	vector<int> cardNumCounts(5);
+
+	std::cout << hand << '\n';
+
+	std::sort(hand.begin(), hand.end());
+
+	std::cout << hand << '\n';
+
+	for (int i = 0; i < hand.size() - 1; ++i)
+	{
+		if (hand[i] == hand[i + 1])
+		{
+			cardCount = cardNumCounts[setIndex];
+			cardCount++;
+			cardNumCounts[setIndex] = cardCount;
+		}
+
+		if (hand[i] != hand[i + 1])
+		{
+			cardCount = cardNumCounts[setIndex];
+			cardCount++;
+			cardNumCounts[setIndex] = cardCount;
+			setIndex++;
+		}
+
+	}
+	
+	if (cardNumCounts[0] == 5)
+	{
+		rank = 1; //Five of a kind
+	}
+	else if (cardNumCounts[0] == 4 || cardNumCounts[1] == 4)
+	{
+		rank = 2; //Four of a kind
+	}
+	else if ((cardNumCounts[0] == 3 && cardNumCounts[1] == 2) ||
+			 (cardNumCounts[0] == 2 && cardNumCounts[1] == 3))
+	{
+		rank = 3; //Full house
+	}
+	else if ((cardNumCounts[0] == 3 && cardNumCounts[1] == 1) ||
+			 (cardNumCounts[0] == 1 && cardNumCounts[1] == 3) ||
+			 (cardNumCounts[1] == 1 && cardNumCounts[2] == 3))
+	{
+		rank = 4; //Three of a kind
+	}
+	else if ((cardNumCounts[0] == 2 && cardNumCounts[1] == 2 && cardNumCounts[2] == 1) ||
+		     (cardNumCounts[0] == 1 && cardNumCounts[1] == 2 && cardNumCounts[2] == 2) ||
+			 (cardNumCounts[0] == 2 && cardNumCounts[1] == 1 && cardNumCounts[2] == 2))
+	{
+		rank = 5; //Two pair
+	}
+	else if (cardNumCounts[0] == 2 || cardNumCounts[1] == 2 || 
+			 cardNumCounts[2] == 2 || cardNumCounts[3] == 2)
+	{
+		rank = 6; //One pair
+	}
+	else
+	{
+		rank = 7; //High card
+	}
+
+	return rank;
 }
 
 bool isCharNum(const char& input)
