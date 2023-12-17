@@ -9,9 +9,10 @@ using std::vector;
 using std::string;
 using std::map;
 
-void parsePuzzle(vector<string>& puzzle, map<int, int>* races);
-int chargeBoat(int time);
-int distanceTravelled(int speed, int timeRemaining);
+void parsePuzzle(vector<string>& puzzle, map<unsigned long long, unsigned long long>* races);
+unsigned long long chargeBoat(unsigned long long time);
+unsigned long long distanceTravelled(unsigned long long speed, unsigned long long timeRemaining);
+unsigned long long getMarginOfErrorProduct(map<unsigned long long, unsigned long long>* races);
 bool isCharNum(const char& input);
 
 int main()
@@ -19,9 +20,11 @@ int main()
 	std::ifstream puzzleFile;
 	string line;
 	vector<string> puzzleInput;
-	map<int, int> races_TimeDistance;
+	map<unsigned long long, unsigned long long> races_TimeDistance;
+	unsigned long long marginOfError = 0;
+	unsigned long long marginOfErrorProduct = 0;
 
-	puzzleFile.open("test_input.txt");
+	puzzleFile.open("puzzle_input_p2.txt");
 	if (puzzleFile.is_open())
 	{
 		while (std::getline(puzzleFile, line))
@@ -34,28 +37,33 @@ int main()
 
 	parsePuzzle(puzzleInput, &races_TimeDistance);
 
+	marginOfErrorProduct = getMarginOfErrorProduct(&races_TimeDistance);
+
+	std::cout << "Margin of error product is " << marginOfErrorProduct << '\n';
+
 	return 0;
 }
 
-int chargeBoat(int time)
+unsigned long long chargeBoat(unsigned long long time)
 {
-	int speed = 0;
+	unsigned long long speed = 0;
 	speed += time;
 	return speed;
 }
 
-int distanceTravelled(int speed, int timeRemaining)
+unsigned long long distanceTravelled(unsigned long long speed, unsigned long long timeRemaining)
 {
 	return speed * timeRemaining;
 }
 
-int getMarginOfError(map<int, int>* races)
+unsigned long long getMarginOfErrorProduct(map<unsigned long long, unsigned long long>* races)
 {
-	int raceTime = 0;
-	int recordDistance = 0;
-	int boatSpeed = 0;
-	int boatTimeRemaining = 0;
-	int marginOfError = 0;
+	unsigned long long raceTime = 0;
+	unsigned long long recordDistance = 0;
+	unsigned long long boatSpeed = 0;
+	unsigned long long boatTimeRemaining = 0;
+	unsigned long long marginOfError = 0;
+	unsigned long long marginOfErrorProduct = 0;
 
 	for (auto it = races->begin(); it != races->end(); ++it)
 	{
@@ -65,19 +73,29 @@ int getMarginOfError(map<int, int>* races)
 		for (int boatTime = 0; boatTime < raceTime; ++boatTime)
 		{
 			boatSpeed = chargeBoat(boatTime);
-			boatTimeRemaining = 
-			distanceTravelled(, )
+			boatTimeRemaining = raceTime - boatSpeed;
+			if (distanceTravelled(boatSpeed, boatTimeRemaining) > recordDistance)
+			{
+				marginOfError++;
+			}
 		}
+		if (marginOfErrorProduct == 0)
+		{
+			marginOfErrorProduct = marginOfError;
+		}
+		else marginOfErrorProduct *= marginOfError;
+		
+		marginOfError = 0;
 	}
 
-	return 0;
+	return marginOfErrorProduct;
 }
-void parsePuzzle(vector<string>& puzzle, map<int, int>* races)
+void parsePuzzle(vector<string>& puzzle, map<unsigned long long, unsigned long long>* races)
 {
 	string time = "";
 	string distance = "";
-	vector<int> times;
-	vector<int> distances;
+	vector<unsigned long long> times;
+	vector<unsigned long long> distances;
 
 	for (int i = 0; i < puzzle.size(); ++i)
 	{
@@ -85,7 +103,7 @@ void parsePuzzle(vector<string>& puzzle, map<int, int>* races)
 		{
 			if (i == 0 && j >= puzzle[i].size())
 			{
-				times.push_back(std::stoi(time));
+				times.push_back(std::stoull(time));
 				break;
 			}
 			if (i == 0 && isCharNum(puzzle[i][j]))
@@ -94,13 +112,13 @@ void parsePuzzle(vector<string>& puzzle, map<int, int>* races)
 			}
 			if (i == 0 && !isCharNum(puzzle[i][j]) && time != "")
 			{
-				times.push_back(std::stoi(time));
+				times.push_back(std::stoull(time));
 				time = "";
 			}
 
 			if (i == 1 && j >= puzzle[i].size())
 			{
-				distances.push_back(std::stoi(distance));
+				distances.push_back(std::stoull(distance));
 				break;
 			}
 			if (i == 1 && isCharNum(puzzle[i][j]))
@@ -109,7 +127,7 @@ void parsePuzzle(vector<string>& puzzle, map<int, int>* races)
 			}
 			if (i == 1 && !isCharNum(puzzle[i][j]) && distance != "")
 			{
-				distances.push_back(std::stoi(distance));
+				distances.push_back(std::stoull(distance));
 				distance = "";
 			}
 		}

@@ -23,5 +23,6 @@
     <Text Include="test_input.txt" />
     <Text Include="puzzle_input.txt" />
     <Text Include="puzzle_instructions.txt" />
+    <Text Include="puzzle_input_p2.txt" />
   </ItemGroup>
 </Project>

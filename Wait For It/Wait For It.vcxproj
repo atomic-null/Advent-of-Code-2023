@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="puzzle_input.txt" />
+    <Text Include="puzzle_input_p2.txt" />
     <Text Include="puzzle_instructions.txt" />
     <Text Include="test_input.txt" />
   </ItemGroup>
