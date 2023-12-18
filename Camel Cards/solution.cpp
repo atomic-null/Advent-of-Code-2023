@@ -10,9 +10,8 @@ using std::string;
 void parsePuzzle(vector<string>& puzzle, vector<vector<string>>* bets);
 int getPrimaryCardRank(string hand);
 bool compareSecondaryCardRank(char first, char second);
-void compareHandRank(vector<string> hand1, vector<string> hand2);
+void compareHandRank(vector<string>& hand1, vector<string>& hand2);
 int calculateTotalBidValue(vector<vector<string>>& hands);
-bool isCharNum(const char& input);
 
 enum Card
 {
@@ -298,12 +297,12 @@ bool compareSecondaryCardRank(char first, char second)
 	return isFirstGreater;
 }
 
-void compareHandRank(vector<string> hand1, vector<string> hand2)
+void compareHandRank(vector<string> &hand1, vector<string> &hand2)
 {
 	int rankNum = 0;
 	for (int i = 0; i < hand1[0].size(); ++i)
 	{
-		if (hand1[0][i] != hand2[0][i])
+		if (hand1[2] == hand2[2])
 		{
 			if (compareSecondaryCardRank(hand1[0][i], hand2[0][i]))
 			{
@@ -348,16 +347,4 @@ int calculateTotalBidValue(vector<vector<string>>& hands)
 	}
 
 	return totalValue;
-}
-
-bool isCharNum(const char& input)
-{
-	if (input == '0' || input == '1' || input == '2' ||
-		input == '3' || input == '4' || input == '5' ||
-		input == '6' || input == '7' || input == '8' ||
-		input == '9')
-	{
-		return true;
-	}
-	else return false;
 }
