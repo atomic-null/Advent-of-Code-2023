@@ -8,7 +8,7 @@ using std::vector;
 using std::string;
 
 void parsePuzzle(vector<string>& puzzle, vector<vector<string>>* bets);
-int getPrimaryCardRank(string hand);
+bool comparePrimaryCardRank(string hand1, string hand2);
 bool compareSecondaryCardRank(char first, char second);
 void compareHandRank(vector<string>& hand1, vector<string>& hand2);
 int calculateTotalBidValue(vector<vector<string>>& hands);
@@ -85,7 +85,7 @@ void parsePuzzle(vector<string>& puzzle, vector<vector<string>>* bets)
 			{
 				bet.push_back(hand);
 				bet.push_back(bid);
-				bet.push_back(std::to_string(getPrimaryCardRank(hand) + i));
+				bet.push_back(std::to_string(i + 1));
 				hand = "";
 				bid = "";
 				isHand = true;
@@ -107,22 +107,21 @@ void parsePuzzle(vector<string>& puzzle, vector<vector<string>>* bets)
 	}	
 }
 
-int getPrimaryCardRank(string hand)
+bool comparePrimaryCardRank(string hand1, string hand2)
 {
-	int rank = 0;
+	int hand1Rank = 0;
+	int hand2Rank = 0;
 	int setIndex = 0;
 	int cardCount = 0;
+	bool isFirstGreater = false;
 	vector<int> cardNumCounts(5);
 
-	std::cout << hand << '\n';
+	std::sort(hand1.begin(), hand1.end());
+	std::sort(hand2.begin(), hand2.end());
 
-	std::sort(hand.begin(), hand.end());
-
-	std::cout << hand << '\n';
-
-	for (int i = 0; i < hand.size(); ++i)
+	for (int i = 0; i < hand1.size(); ++i)
 	{
-		if (i == hand.size() - 1)
+		if (i == hand1.size() - 1)
 		{
 			cardCount = cardNumCounts[setIndex];
 			cardCount++;
@@ -131,14 +130,14 @@ int getPrimaryCardRank(string hand)
 			continue;
 		}
 
-		if (hand[i] == hand[i + 1])
+		if (hand1[i] == hand1[i + 1])
 		{
 			cardCount = cardNumCounts[setIndex];
 			cardCount++;
 			cardNumCounts[setIndex] = cardCount;
 		}
 
-		if (hand[i] != hand[i + 1])
+		if (hand1[i] != hand1[i + 1])
 		{
 			cardCount = cardNumCounts[setIndex];
 			cardCount++;
@@ -151,40 +150,115 @@ int getPrimaryCardRank(string hand)
 	
 	if (cardNumCounts[0] == 5)
 	{
-		rank = 7; //Five of a kind
+		hand1Rank = 7; //Five of a kind
 	}
 	else if (cardNumCounts[0] == 4 || cardNumCounts[1] == 4)
 	{
-		rank = 6; //Four of a kind
+		hand1Rank = 6; //Four of a kind
 	}
 	else if ((cardNumCounts[0] == 3 && cardNumCounts[1] == 2) ||
 			 (cardNumCounts[0] == 2 && cardNumCounts[1] == 3))
 	{
-		rank = 5; //Full house
+		hand1Rank = 5; //Full house
 	}
 	else if ((cardNumCounts[0] == 3 && cardNumCounts[1] == 1) ||
 			 (cardNumCounts[0] == 1 && cardNumCounts[1] == 3) ||
 			 (cardNumCounts[1] == 1 && cardNumCounts[2] == 3))
 	{
-		rank = 4; //Three of a kind
+		hand1Rank = 4; //Three of a kind
 	}
 	else if ((cardNumCounts[0] == 2 && cardNumCounts[1] == 2 && cardNumCounts[2] == 1) ||
 		     (cardNumCounts[0] == 1 && cardNumCounts[1] == 2 && cardNumCounts[2] == 2) ||
 			 (cardNumCounts[0] == 2 && cardNumCounts[1] == 1 && cardNumCounts[2] == 2))
 	{
-		rank = 3; //Two pair
+		hand1Rank = 3; //Two pair
 	}
 	else if (cardNumCounts[0] == 2 || cardNumCounts[1] == 2 || 
 			 cardNumCounts[2] == 2 || cardNumCounts[3] == 2)
 	{
-		rank = 2; //One pair
+		hand1Rank = 2; //One pair
 	}
 	else
 	{
-		rank = 1; //High card
+		hand1Rank = 1; //High card
+	}
+	setIndex = 0;
+	cardCount = 0;
+	cardNumCounts[0] = 0;
+	cardNumCounts[1] = 0;
+	cardNumCounts[2] = 0;
+	cardNumCounts[3] = 0;
+	cardNumCounts[4] = 0;
+
+
+	for (int i = 0; i < hand2.size(); ++i)
+	{
+		if (i == hand2.size() - 1)
+		{
+			cardCount = cardNumCounts[setIndex];
+			cardCount++;
+			cardNumCounts[setIndex] = cardCount;
+			cardCount = 0;
+			continue;
+		}
+
+		if (hand2[i] == hand2[i + 1])
+		{
+			cardCount = cardNumCounts[setIndex];
+			cardCount++;
+			cardNumCounts[setIndex] = cardCount;
+		}
+
+		if (hand2[i] != hand2[i + 1])
+		{
+			cardCount = cardNumCounts[setIndex];
+			cardCount++;
+			cardNumCounts[setIndex] = cardCount;
+			setIndex++;
+			cardCount = 0;
+		}
+
 	}
 
-	return rank;
+	if (cardNumCounts[0] == 5)
+	{
+		hand2Rank = 7; //Five of a kind
+	}
+	else if (cardNumCounts[0] == 4 || cardNumCounts[1] == 4)
+	{
+		hand2Rank = 6; //Four of a kind
+	}
+	else if ((cardNumCounts[0] == 3 && cardNumCounts[1] == 2) ||
+		(cardNumCounts[0] == 2 && cardNumCounts[1] == 3))
+	{
+		hand2Rank = 5; //Full house
+	}
+	else if ((cardNumCounts[0] == 3 && cardNumCounts[1] == 1) ||
+		(cardNumCounts[0] == 1 && cardNumCounts[1] == 3) ||
+		(cardNumCounts[1] == 1 && cardNumCounts[2] == 3))
+	{
+		hand2Rank = 4; //Three of a kind
+	}
+	else if ((cardNumCounts[0] == 2 && cardNumCounts[1] == 2 && cardNumCounts[2] == 1) ||
+		(cardNumCounts[0] == 1 && cardNumCounts[1] == 2 && cardNumCounts[2] == 2) ||
+		(cardNumCounts[0] == 2 && cardNumCounts[1] == 1 && cardNumCounts[2] == 2))
+	{
+		hand2Rank = 3; //Two pair
+	}
+	else if (cardNumCounts[0] == 2 || cardNumCounts[1] == 2 ||
+		cardNumCounts[2] == 2 || cardNumCounts[3] == 2)
+	{
+		hand2Rank = 2; //One pair
+	}
+	else
+	{
+		hand2Rank = 1; //High card
+	}
+
+	if (hand1Rank > hand2Rank) isFirstGreater = true;
+	if (hand1Rank < hand2Rank) isFirstGreater = false;
+
+	return isFirstGreater;
 }
 
 bool compareSecondaryCardRank(char first, char second)
@@ -300,6 +374,32 @@ bool compareSecondaryCardRank(char first, char second)
 void compareHandRank(vector<string> &hand1, vector<string> &hand2)
 {
 	int rankNum = 0;
+
+	if (comparePrimaryCardRank(hand1[0], hand2[0]) && (hand1[2] <= hand2[2]))
+	{
+		rankNum = std::stoi(hand1[2]);
+		rankNum++;
+		hand1[2] = std::to_string(rankNum);
+
+		rankNum = std::stoi(hand2[2]);
+		rankNum--;
+		hand2[2] = std::to_string(rankNum);
+
+		rankNum = 0;
+	}
+	if (!comparePrimaryCardRank(hand1[0], hand2[0]) && (hand1[2] >= hand2[2]))
+	{
+		rankNum = std::stoi(hand2[2]);
+		rankNum++;
+		hand2[2] = std::to_string(rankNum);
+
+		rankNum = std::stoi(hand1[2]);
+		rankNum--;
+		hand1[2] = std::to_string(rankNum);
+
+		rankNum = 0;
+	}
+
 	for (int i = 0; i < hand1[0].size(); ++i)
 	{
 		if (hand1[2] == hand2[2])
